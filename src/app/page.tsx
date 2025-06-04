@@ -30,27 +30,31 @@ export default function Home() {
     fetchCategories();
   }, []);
 
-  // Debounced search function
+  // Create debounced search function
   const debouncedSearch = useCallback(
-    debounce(async (query: string) => {
-      if (!query.trim()) {
-        // If search is empty, fetch meals by selected category
-        const data = await getMealsByCategory(selectedCategory || 'Beef');
-        setMeals(data);
-        return;
-      }
+    (query: string, category: string | null) => {
+      return debounce(async () => {
+        if (!query.trim()) {
+          // If search is empty, fetch meals by selected category
+          const data = await getMealsByCategory(category || 'Beef');
+          setMeals(data);
+          return;
+        }
 
-      try {
-        const data = await searchMeals(query);
-        setMeals(data);
-      } catch (error) {
-        console.error('Failed to search meals:', error);
-      }
-    }, 500),
-    [selectedCategory]
+        try {
+          const data = await searchMeals(query);
+          setMeals(data);
+        } catch (error) {
+          console.error('Failed to search meals:', error);
+        } finally {
+          setIsLoading(false);
+        }
+      }, 500)();
+    },
+    [] // No dependencies needed as we're using the latest values from closure
   );
 
-  // Effect for category changes
+  // Effect for category changes and search
   useEffect(() => {
     const fetchMeals = async () => {
       setIsLoading(true);
@@ -78,7 +82,7 @@ export default function Home() {
     const query = e.target.value;
     setSearchQuery(query);
     setIsLoading(true);
-    debouncedSearch(query);
+    debouncedSearch(query, selectedCategory);
   };
 
   return (

@@ -1,7 +1,6 @@
 import { Meal, Category, MealsResponse, CategoriesResponse } from '../types/meal';
 
 const API_BASE = 'https://www.themealdb.com/api/json/v1/1';
-const API_KEY = '1'; // Test API key
 
 export async function getMealsByCategory(category: string): Promise<Meal[]> {
   const res = await fetch(`${API_BASE}/filter.php?c=${category}`);

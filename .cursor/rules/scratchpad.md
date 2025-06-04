@@ -30,15 +30,22 @@
 4. Leverage TypeScript for all components and utility functions to ensure type safety and improve maintainability.
 5. Prioritize responsive design from the start, testing on various screen sizes.
 6. Use semantic HTML elements for better accessibility and SEO.
-
+7. To install shadcn/ui, use the new package name:
+   ```bash
+   npx shadcn@latest init
+   ```
+   This replaces the deprecated `shadcn-ui` package. After initialization, install components using:
+   ```bash
+   npx shadcn@latest add [component-name]
+   ```
 
 ## Scratchpad
 
 ### 1. Project Setup and Configuration [ ]
 
-- [ ] Create empty GitHub repo and clone it locally
-- [ ] Initialize new Next.js 15 project with TypeScript inside the repo
-- [ ] Set up project structure:
+- [X] Create empty GitHub repo and clone it locally
+- [X] Initialize new Next.js 15 project with TypeScript inside the repo
+- [X] Set up project structure:
   ```
   src/
   ├── app/
@@ -53,33 +60,48 @@
   │   └── layout/
   │       └── Header.tsx
   ├── lib/
-  │   └── data/
-  │       └── menu.ts (Menu data)
+  │   ├── api/
+  │   │   └── meals.ts (TheMealDB API client)
+  │   └── types/
+  │       └── meal.ts (API types)
   └── types/
       └── index.ts (TypeScript interfaces)
   ```
-- [ ] Configure ESLint and Prettier
-- [ ] Install and configure dependencies:
+- [X] Configure ESLint and Prettier
+- [X] Install and configure dependencies:
   - [X] Tailwind CSS for styling
-  - [ ] shadcn/ui for enhanced UI components
-  - [ ] React Icons for UI icons
+  - [X] shadcn/ui for enhanced UI components
+    - [X] Card component (for menu items)
+    - [X] Button component (for category filters)
+    - [X] Input component (for search)
+    - [X] Skeleton component (for loading states)
+  - [X] React Icons for UI icons
+    - [X] Search icon (from react-icons/ai)
+    - [X] Category icons (from react-icons/md)
+    - [X] Loading spinner (from react-icons/ri)
 
 ### 2. Core Features Development [ ]
 
 - [ ] Implement Menu Listing Page:
   - [ ] Create MenuCard component:
-    - [ ] Display dish image
-    - [ ] Show dish name
-    - [ ] Show price with proper formatting
+    - [ ] Display meal image (using /preview endpoint for thumbnails)
+    - [ ] Show meal name
+    - [ ] Show category
     - [ ] Add hover effects using shadcn/ui
   - [ ] Create MenuGrid component:
     - [ ] Responsive grid layout
     - [ ] Loading state
     - [ ] Error handling
   - [ ] Implement CategoryFilter component:
-    - [ ] Filter buttons for: Entradas, Platos fuertes, Postres
+    - [ ] Fetch categories from `/categories.php` endpoint
+    - [ ] Filter buttons for categories
     - [ ] Active state styling
     - [ ] Smooth transitions
+  - [ ] Implement search functionality:
+    - [ ] Search by name using `/search.php?s=` endpoint
+    - [ ] Search by first letter using `/search.php?f=` endpoint
+    - [ ] Debounced search input
+    - [ ] Loading states
 
 ### 3. UI/UX Development [ ]
 
@@ -98,24 +120,64 @@
 
 ### 4. Data Management [ ]
 
-- [ ] Set up menu data structure:
+- [ ] Set up API integration:
   ```typescript
-  interface MenuItem {
-    id: number;
-    name: string;
-    description: string;
-    price: number;
-    image: string;
-    category: 'Entradas' | 'Platos fuertes' | 'Postres';
+  // lib/types/meal.ts
+  interface Meal {
+    idMeal: string;
+    strMeal: string;
+    strCategory: string;
+    strArea: string;
+    strMealThumb: string;
+    strInstructions: string;
+    strIngredient1: string;
+    strIngredient2: string;
+    // ... up to strIngredient20
+    strMeasure1: string;
+    strMeasure2: string;
+    // ... up to strMeasure20
+  }
+
+  interface Category {
+    idCategory: string;
+    strCategory: string;
+    strCategoryThumb: string;
+    strCategoryDescription: string;
   }
   ```
-- [ ] Create sample menu data
-- [ ] Implement category filtering logic
+- [ ] Implement API client:
+  ```typescript
+  // lib/api/meals.ts
+  const API_BASE = 'https://www.themealdb.com/api/json/v1/1';
+  const API_KEY = '1'; // Test API key
+
+  async function getMealsByCategory(category: string): Promise<Meal[]> {
+    const res = await fetch(`${API_BASE}/filter.php?c=${category}`);
+    if (!res.ok) throw new Error('Failed to fetch meals');
+    return res.json();
+  }
+
+  async function getMealById(id: string): Promise<Meal> {
+    const res = await fetch(`${API_BASE}/lookup.php?i=${id}`);
+    if (!res.ok) throw new Error('Failed to fetch meal');
+    return res.json();
+  }
+
+  async function getCategories(): Promise<Category[]> {
+    const res = await fetch(`${API_BASE}/categories.php`);
+    if (!res.ok) throw new Error('Failed to fetch categories');
+    return res.json();
+  }
+  ```
+- [ ] Implement data fetching and caching:
+  - [ ] Use Next.js built-in caching
+  - [ ] Implement error handling
+  - [ ] Add loading states
 
 ### 5. Performance and SEO Optimization [ ]
 
 - [ ] Optimize images:
-  - [ ] Use Next.js Image component
+  - [ ] Use Next.js Image component with TheMealDB image URLs
   - [ ] Implement lazy loading
   - [ ] Add proper alt texts
 - [ ] Implement SEO:
@@ -131,6 +193,7 @@
 
 - [ ] Add unit tests:
   - [ ] Test components
+  - [ ] Test API integration
   - [ ] Test filtering functionality
 - [ ] Manual testing:
   - [ ] Cross-browser testing
@@ -150,6 +213,7 @@
 - [ ] Create README:
   - [ ] Project setup instructions
   - [ ] Development guidelines
+  - [ ] API integration details
 - [ ] Add code comments
 - [ ] Document component usage
 
